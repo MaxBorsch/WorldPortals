@@ -1,0 +1,9 @@
+{
+    "id" : "WorldPortals",
+    "version" : "0.1.0",
+    "author" : "Max Borsch",
+    "displayName" : "World Portals",
+    "description" : "",
+    "dependencies" : [],
+    "serverSideOnly" : false
+}
