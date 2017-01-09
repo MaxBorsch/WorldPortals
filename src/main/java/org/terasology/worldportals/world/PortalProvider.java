@@ -31,7 +31,7 @@ import org.terasology.world.generator.plugin.RegisterPlugin;
 
 @Produces(PortalFacet.class)
 @Requires(@Facet(value = SurfaceHeightFacet.class, border = @FacetBorder(sides = 4)))
-public class PortalProvider implements FacetProviderPlugin {
+public abstract class PortalProvider implements FacetProviderPlugin {
 
     private Noise noise;
 
@@ -55,7 +55,7 @@ public class PortalProvider implements FacetProviderPlugin {
             float sHeight = surfaceHeightFacet.getWorld(pos.x(),pos.z());
             float noiseValue = noise.noise(pos.x(),pos.y(),pos.z());
 
-            if (pos.y()==Math.round(sHeight) && noiseValue > 0.9993 && pos.x() < worldRegion.maxX() - 8 && pos.z() < worldRegion.maxY() - 8) {
+            if (checkSpawnPortal(pos, sHeight, noiseValue) && pos.x() < worldRegion.maxX() - 8 && pos.z() < worldRegion.maxY() - 8) {
                 facet.setWorld(pos.x(), (int)sHeight, pos.z(), new Portal());
                 break;
             }
@@ -65,4 +65,6 @@ public class PortalProvider implements FacetProviderPlugin {
 
         region.setRegionFacet(PortalFacet.class, facet);
     }
+
+    public abstract boolean checkSpawnPortal (Vector3i position, float surfaceHeight, float noiseValue);
 }

@@ -16,15 +16,21 @@
 package org.terasology.worldportals.component;
 
 import org.terasology.entitySystem.Component;
+import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 
 /**
  * Attached to portal blocks to keep track of them and where they lead to.
  */
 public class PortalComponent implements Component {
-    public Vector3i destination;
 
-    public PortalComponent (Vector3i destination) {
-        this.destination = destination;
-    }
+    /**
+     * The location of this portal in block coordinates.
+     */
+    public Vector3i location;
+
+    /**
+     * The destination of this portal.
+     */
+    public Vector3f destination;
 }

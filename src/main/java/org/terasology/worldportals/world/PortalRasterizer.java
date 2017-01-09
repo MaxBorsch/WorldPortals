@@ -15,13 +15,10 @@
  */
 package org.terasology.worldportals.world;
 
-import org.terasology.entitySystem.entity.EntityBuilder;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.internal.EngineEntityManager;
 import org.terasology.math.ChunkMath;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector3i;
+import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
@@ -30,14 +27,14 @@ import org.terasology.world.block.BlockManager;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generation.WorldRasterizerPlugin;
-import org.terasology.worldportals.component.PortalComponent;
+import org.terasology.worldportals.PortalSystem;
 
 import java.util.Map.Entry;
 
 public abstract class PortalRasterizer implements WorldRasterizerPlugin {
 
     @In
-    EntityManager entityManager;
+    PortalSystem portalSystem;
 
     private Block structureBlock;
     private Block portal;
@@ -45,7 +42,7 @@ public abstract class PortalRasterizer implements WorldRasterizerPlugin {
     private String structureBlockName;
     private String portalBlockName;
 
-    public PortalRasterizer (Vector3i destination) {
+    public PortalRasterizer () {
         this ("Core:Stone", "Core:Glass");
     }
 
@@ -77,27 +74,16 @@ public abstract class PortalRasterizer implements WorldRasterizerPlugin {
             for (Vector3i newBlockPosition : walls) {
                 if (chunkRegion.getRegion().encompasses(newBlockPosition) && !inside.encompasses(newBlockPosition)) {
                     chunk.setBlock(ChunkMath.calcBlockPos(newBlockPosition), structureBlock);
+
                 } else if (inside.encompasses(newBlockPosition)) {
-                    Block portalBlock = chunk.setBlock(ChunkMath.calcBlockPos(newBlockPosition), portal);
-                    EntityRef portalEntity = portalBlock.getEntity();
+                    chunk.setBlock(ChunkMath.calcBlockPos(newBlockPosition), portal);
 
-                    if (!portalEntity.exists()) {
-                        EntityBuilder entityBuilder = entityManager.newBuilder();
-                        entityBuilder.addComponent(new PortalComponent(getDestination(newBlockPosition)));
-                        portalEntity = entityBuilder.build();
-
-                        portalBlock.setEntity(portalEntity);
-
-                    } else if (portalEntity.hasComponent(PortalComponent.class)) {
-                        portalEntity.getComponent(PortalComponent.class).destination = getDestination(newBlockPosition);
-                    } else {
-                        portalEntity.addComponent(new PortalComponent(getDestination(newBlockPosition)));
-                    }
+                    PortalSystem.generatePortal(newBlockPosition, getDestination(newBlockPosition));
 
                 }
             }
         }
     }
 
-    public abstract Vector3i getDestination (Vector3i portalPosition);
+    public abstract Vector3f getDestination (Vector3i portalPosition);
 }
