@@ -16,13 +16,12 @@
 
 package org.terasology.worldportals.world;
 
+import org.terasology.math.geom.Vector3i;
+
 /**
  * Defines a portal.
  */
-public class Portal {
-    // important fields and properties go here
+public interface Portal {
 
-    public int getExtent() {
-        return 3;
-    }
+    Vector3i getExtent();
 }

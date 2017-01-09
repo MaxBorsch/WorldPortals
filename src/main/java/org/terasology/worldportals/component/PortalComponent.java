@@ -20,7 +20,7 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 
 /**
- * Attached to portal blocks to keep track of them and where they lead to.
+ * When added to an entity, a portal will be created. Mainly used for portal persistance.
  */
 public class PortalComponent implements Component {
 

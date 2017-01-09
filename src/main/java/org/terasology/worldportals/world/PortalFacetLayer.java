@@ -3,6 +3,7 @@ package org.terasology.worldportals.world;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.world.generation.Region;
 import org.terasology.world.viewer.layers.AbstractFacetLayer;
 import org.terasology.world.viewer.layers.Renders;
@@ -28,13 +29,13 @@ public class PortalFacetLayer extends AbstractFacetLayer {
         g.translate(-dx, -dy);
 
         for (Entry<BaseVector3i, Portal> entry : portalFacet.getWorldEntries().entrySet()) {
-            int extent = entry.getValue().getExtent();
+            Vector3i extent = entry.getValue().getExtent();
 
             BaseVector3i center = entry.getKey();
             g.setColor(fillColor);
-            g.fillRect(center.x() - extent, center.z() - extent, 2 * extent, 2 * extent);
+            g.fillRect(center.x() - extent.x(), center.z() - extent.y(), 2 * extent.x(), 2 * extent.y());
             g.setColor(frameColor);
-            g.drawRect(center.x() - extent, center.z() - extent, 2 * extent, 2 * extent);
+            g.drawRect(center.x() - extent.x(), center.z() - extent.y(), 2 * extent.x(), 2 * extent.y());
         }
 
         g.dispose();
@@ -45,11 +46,11 @@ public class PortalFacetLayer extends AbstractFacetLayer {
         PortalFacet portalFacet = region.getFacet(PortalFacet.class);
 
         for (Entry<BaseVector3i, Portal> entry : portalFacet.getWorldEntries().entrySet()) {
-            int extent = entry.getValue().getExtent();
+            Vector3i extent = entry.getValue().getExtent();
 
             BaseVector3i center = entry.getKey();
-            Vector2i min = new Vector2i(center.x() - extent, center.z() - extent);
-            Vector2i max = new Vector2i(center.x() + extent, center.z() + extent);
+            Vector2i min = new Vector2i(center.x() - extent.x(), center.z() - extent.y());
+            Vector2i max = new Vector2i(center.x() + extent.x(), center.z() + extent.y());
             if (Rect2i.createFromMinAndMax(min, max).contains(wx, wy)) {
                 return "Portal";
             }

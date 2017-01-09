@@ -42,6 +42,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Handles world portals that when entered take the character to a set destination in the same world.
+ * A portal has an integer block position and a float world destination.
+ * When a player enters the same block as an existing portal they are teleported to that portal's destination.
+ *
+ * Portals are by default persistant entities with a PortalComponent. Adding a PortalComponent to an entity creates a portal.
+ */
 @RegisterSystem(RegisterMode.AUTHORITY)
 @Share (PortalSystem.class)
 public class PortalSystem implements ComponentSystem, UpdateSubscriberSystem {
@@ -59,7 +66,12 @@ public class PortalSystem implements ComponentSystem, UpdateSubscriberSystem {
      */
     private static final List<GeneratedPortal> generatedPortals = Collections.synchronizedList(new LinkedList<>());
 
+    /**
+     * List of characters and their destinations to be teleported the next update.
+     */
     private final List<TeleportRequest> teleportingPlayers = new LinkedList<>();
+
+
 
     @ReceiveEvent(components = {PortalComponent.class})
     public void onPortalActivated(OnActivatedComponent event, EntityRef entity, PortalComponent portalComponent) {
@@ -72,7 +84,7 @@ public class PortalSystem implements ComponentSystem, UpdateSubscriberSystem {
     }
 
     /**
-     * Triggers the portal when a player touches it.
+     * Triggers portals when players enter them.
      * @param event    An event type variable which checks for the player entering a block (starting to touch)
      * @param entity   The entity entering a block
      */
@@ -94,6 +106,11 @@ public class PortalSystem implements ComponentSystem, UpdateSubscriberSystem {
         portals.remove(startPosition);
     }
 
+    /**
+     * Creates a portal entity at the given location with the given destination.
+     * @param location The portal's location in world coordinates.
+     * @param destination The portal's destination in world coordinates.
+     */
     public void spawnPortal (Vector3i location, Vector3f destination) {
         EntityBuilder entityBuilder = entityManager.newBuilder();
 
@@ -105,6 +122,11 @@ public class PortalSystem implements ComponentSystem, UpdateSubscriberSystem {
         entityBuilder.build();
     }
 
+    /**
+     * Called during world generation to queue up portals that need to be created when the system loads.
+     * @param location The portal's location.
+     * @param destination The portal's destination.
+     */
     public static void generatePortal (Vector3i location, Vector3f destination) {
         synchronized (generatedPortals) {
             generatedPortals.add(new GeneratedPortal(location, destination));
@@ -140,12 +162,13 @@ public class PortalSystem implements ComponentSystem, UpdateSubscriberSystem {
     public void shutdown() {
         portals.clear();
         generatedPortals.clear();
+        teleportingPlayers.clear();
     }
 
     @Override
     public void update(float delta) {
-        synchronized (generatedPortals) {
-            if (generatedPortals.size() > 0) {
+        if (generatedPortals.size() > 0) {
+            synchronized (generatedPortals) {
                 Iterator<GeneratedPortal> toGenerate = generatedPortals.iterator();
                 while (toGenerate.hasNext()) {
                     GeneratedPortal p = toGenerate.next();
@@ -155,10 +178,12 @@ public class PortalSystem implements ComponentSystem, UpdateSubscriberSystem {
             }
         }
 
-        for (TeleportRequest request : teleportingPlayers) {
-            request.character.send(new CharacterTeleportEvent(request.destination));
+        if (teleportingPlayers.size() > 0) {
+            for (TeleportRequest request : teleportingPlayers) {
+                request.character.send(new CharacterTeleportEvent(request.destination));
+            }
+            teleportingPlayers.clear();
         }
-        teleportingPlayers.clear();
     }
 
     private static class GeneratedPortal {

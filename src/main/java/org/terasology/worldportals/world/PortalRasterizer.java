@@ -62,15 +62,12 @@ public abstract class PortalRasterizer implements WorldRasterizerPlugin {
         PortalFacet portalFacet = chunkRegion.getFacet(PortalFacet.class);
 
         for (Entry<BaseVector3i, Portal> entry : portalFacet.getWorldEntries().entrySet()) {
-            // there should be a house here
-            // create a couple 3d regions to help iterate through the cube shape, inside and out
             Vector3i centerHousePosition = new Vector3i(entry.getKey());
-            int extent = entry.getValue().getExtent();
-            centerHousePosition.add(0, extent, 0);
-            Region3i walls = Region3i.createFromCenterExtents(centerHousePosition, new Vector3i(extent, extent, 0));
-            Region3i inside = Region3i.createFromCenterExtents(centerHousePosition, new Vector3i(extent - 1, extent - 1, 0));
+            Vector3i extent = entry.getValue().getExtent();
+            centerHousePosition.add(0, extent.y(), 0);
+            Region3i walls = Region3i.createFromCenterExtents(centerHousePosition, new Vector3i(extent.x(), extent.y(), 0));
+            Region3i inside = Region3i.createFromCenterExtents(centerHousePosition, new Vector3i(extent.x() - 1, extent.y() - 1, 0));
 
-            // loop through each of the positions in the cube, ignoring the is
             for (Vector3i newBlockPosition : walls) {
                 if (chunkRegion.getRegion().encompasses(newBlockPosition) && !inside.encompasses(newBlockPosition)) {
                     chunk.setBlock(ChunkMath.calcBlockPos(newBlockPosition), structureBlock);
