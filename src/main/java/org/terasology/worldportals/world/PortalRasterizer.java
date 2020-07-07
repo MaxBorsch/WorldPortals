@@ -70,10 +70,10 @@ public abstract class PortalRasterizer implements WorldRasterizerPlugin {
 
             for (Vector3i newBlockPosition : walls) {
                 if (chunkRegion.getRegion().encompasses(newBlockPosition) && !inside.encompasses(newBlockPosition)) {
-                    chunk.setBlock(ChunkMath.calcBlockPos(newBlockPosition), structureBlock);
+                    chunk.setBlock(ChunkMath.calcRelativeBlockPos(newBlockPosition), structureBlock);
 
                 } else if (inside.encompasses(newBlockPosition)) {
-                    chunk.setBlock(ChunkMath.calcBlockPos(newBlockPosition), portal);
+                    chunk.setBlock(ChunkMath.calcRelativeBlockPos(newBlockPosition), portal);
 
                     PortalSystem.generatePortal(newBlockPosition, getDestination(newBlockPosition));
 
